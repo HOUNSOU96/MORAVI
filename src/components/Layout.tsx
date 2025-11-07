@@ -10,9 +10,9 @@ const images = [
   "/images/b1.jpg", "/images/b2.jpg", "/images/b3.webp", "/images/b4.jpg",
   "/images/b5.jpeg", "/images/b6.jpeg", "/images/b7.jpg", "/images/b8.jpeg",
   "/images/b9.jpg", "/images/b10.avif", "/images/b11.jpeg", "/images/b12.jpeg",
-  "/images/b13.jpg", "/images/b14.jpg", "/images/b15.webp", "/images/b16.avif",
+  "/images/b14.jpg", "/images/b15.webp", "/images/b16.avif",
   "/images/b17.jpeg", "/images/b18.webp", "/images/b25.jpg", "/images/b28.webp",
-  "/images/b27.jpg", "/images/b19.jpg", "/images/b21.jpg", "/images/b20.jpg",
+  "/images/b27.jpg", "/images/b19.jpg", "/images/b20.jpg",
   "/images/b24.jpg", "/images/b26.jpg", "/images/b22.jpeg", "/images/b23.webp",
   "/images/b29.jpg", "/images/b30.avif", "/images/b31.jpg", "/images/b32.jpg",
   "/images/b33.jpg", "/images/b34.jpg", "/images/b35.png", "/images/b36.jpg",
@@ -25,6 +25,15 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
+interface Announcement {
+  id: number;
+  type: "alerte" | "avantage" | "info";
+  message: string;
+}
+
+/* ---------------- PLATFORM ---------------- */
+const PLATFORM = import.meta.env.VITE_PLATFORM || "MORAVI"; // "CODE" ou "MORAVI"
+
 /* ---------------- COMPONENT ---------------- */
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -36,7 +45,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       (theme === null && window.matchMedia("(prefers-color-scheme: dark)").matches)
     );
   });
-
   const [themeTransition, setThemeTransition] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -44,11 +52,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const state = location.state as { from?: string };
   const from = state?.from;
 
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
   useExitNotifier({ eventType: "connect" });
   useExitNotifier({ eventType: "disconnect" });
 
-  /* ---------------- THÈME ---------------- */
+  /* ---------------- THEME ---------------- */
   useEffect(() => {
     const root = document.documentElement;
     setThemeTransition(true);
@@ -64,7 +73,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }, 100);
   }, [isDark]);
 
-  /* ---------------- NOTIFICATION ---------------- */
+  /* ---------------- NOTIFICATIONS ---------------- */
   useEffect(() => {
     if (!user?.email) return;
     const notify = async (eventType: "connect" | "disconnect") => {
@@ -74,11 +83,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         console.error(`Erreur envoi notif ${eventType}:`, err);
       }
     };
-    const isInternalUrl = (url: string) => window.location.origin && url.startsWith(window.location.origin);
+    const isInternalUrl = (url: string) =>
+      window.location.origin && url.startsWith(window.location.origin);
     const handleBeforeUnload = () => notify("disconnect");
     const handleVisibilityChange = () => {
       if (document.visibilityState === "hidden") notify("disconnect");
-      else if (document.visibilityState === "visible" && isInternalUrl(window.location.href)) notify("connect");
+      else if (document.visibilityState === "visible" && isInternalUrl(window.location.href))
+        notify("connect");
     };
     const handleBlur = () => !document.hidden && notify("disconnect");
     const handleFocus = () => !document.hidden && isInternalUrl(window.location.href) && notify("connect");
@@ -106,6 +117,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       }, 1000);
     }, 6000);
     return () => clearInterval(interval);
+  }, []);
+
+  /* ---------------- FETCH ANNOUNCEMENTS (ONLY CODE) ---------------- */
+  useEffect(() => {
+    if (PLATFORM !== "CODE") return; // MORAVI ne récupère rien
+
+    const fetchAnnouncements = async () => {
+      try {
+        const res = await api.get("/api/announcements");
+        setAnnouncements(res.data);
+      } catch (err) {
+        console.error("Erreur fetch annonces :", err);
+      }
+    };
+    fetchAnnouncements();
   }, []);
 
   /* ---------------- LOGOUT ---------------- */
@@ -158,22 +184,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         .animate-fade { animation: fadeInOut 0.6s ease-in-out; }
       `}</style>
 
-    
-{location.pathname !== "/" && (
-  <button
-  onClick={() => {
-    if (from && from !== location.pathname) navigate(from); // éviter boucle
-    else if ( window.history.length > 1) navigate(-2);
-    else navigate("/"); // fallback vers Home
-  }}
-
-    className="fixed top-4 left-4 z-50 bg-blue-200 dark:bg-blue-700 text-xl p-2 rounded-full shadow hover:scale-105 transition"
-    aria-label="Retour à la page précédente"
-  >
-    Retour
-  </button>
-)}
-
+      {/* Bouton retour */}
+      {location.pathname !== "/" && (
+        <button
+          onClick={() => {
+            if (from && from !== location.pathname) navigate(from);
+            else if (window.history.length > 1) navigate(-2);
+            else navigate("/");
+          }}
+          className="fixed top-4 left-4 z-50 bg-blue-200 dark:bg-blue-700 text-xl p-2 rounded-full shadow hover:scale-105 transition"
+          aria-label="Retour à la page précédente"
+        >
+          Retour
+        </button>
+      )}
 
       {/* Bouton dark mode */}
       {location.pathname !== "/page1" && (
@@ -186,7 +210,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </button>
       )}
 
-      {/* Bouton déconnexion en bas */}
+      {/* Bouton déconnexion */}
       {user && (
         <>
           <div className="hidden sm:block fixed bottom-6 right-6 z-40 group">
@@ -213,6 +237,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </span>
           </div>
         </>
+      )}
+
+      {/* Affichage annonces (CODE uniquement) */}
+      {PLATFORM === "CODE" && announcements.length > 0 && (
+        <div className="fixed top-16 right-4 z-50 space-y-2">
+          {announcements.map((a) => (
+            <div
+              key={a.id}
+              className={`p-3 rounded shadow ${
+                a.type === "alerte" ? "bg-red-200" :
+                a.type === "avantage" ? "bg-green-200" :
+                "bg-blue-200"
+              }`}
+            >
+              {a.message}
+            </div>
+          ))}
+        </div>
       )}
 
       {/* Contenu */}
