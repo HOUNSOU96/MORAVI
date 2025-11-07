@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000", // adapte si ton backend est sur un autre host/port
+  baseURL: import.meta.env.VITE_API_URL || "https://code-backend-iuol.onrender.com", // adapte si ton backend est sur un autre host/port
   withCredentials: true,
 });
 
