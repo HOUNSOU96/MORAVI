@@ -1,6 +1,6 @@
 // 📁 src/AnimatedRoutes.tsx
 import React from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import Layout from "@/components/Layout";
 import RequireAuth from "@/components/RequireAuth";
@@ -99,6 +99,10 @@ import Hometrompette from "./pages/Home/Hometrompette";
 import Hometrading from "./pages/Home/Hometrading";
 import Home1xbet from "./pages/Home/Home1xbet";
 
+
+
+
+import AdminOrders from "@/pages/AdminOrders";
 // 🔹 Définition unique des pages protégées
 const protectedPages = [
   
@@ -190,7 +194,10 @@ const protectedPages = [
 ];
 
 
-
+const PrivateRoute = ({ children }: { children: JSX.Element }) => {
+  const token = localStorage.getItem("token");
+  return token ? children : <Navigate to="/login" />;
+};
 
 
 
@@ -205,7 +212,17 @@ const AnimatedRoutes: React.FC = () => {
         {/* Routes publiques */}
         <Route path="/home" element={<Home />} />
         <Route path="/page1/:redirect" element={<Page1 />} />
-        <Route path="/login" element={<Login />} />
+        
+        <Route
+          path="/login"
+          element={
+            
+              <Layout>
+                <Login />
+              </Layout>
+            
+          }
+        />
         <Route path="/inscription" element={<Inscription />} />
          <Route
   path="/produit/:slug"
@@ -336,6 +353,19 @@ const AnimatedRoutes: React.FC = () => {
 />
 
 <Route path="/liste-inscrits" element={<ListeInscrits />} />
+
+
+<Route path="/admin/orders" element={
+  <PrivateRoute>
+    <Layout>
+      <AdminOrders />
+    </Layout>
+  </PrivateRoute>
+} />
+
+
+        {/* Redirection par défaut */}
+        <Route path="*" element={<Navigate to="/" />} />
 
 
       </Routes>

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
+import api from "@/utils/axios";
 
 const Login: React.FC = () => {
   const [password, setPassword] = useState("");
@@ -8,9 +9,6 @@ const Login: React.FC = () => {
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
-  const location = useLocation();
-  const state = location.state as { from?: string };
-  const from = state?.from || "/"; // page de retour par défaut
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,55 +20,35 @@ const Login: React.FC = () => {
     }
 
     try {
-      // Envoi du mot de passe au backend pour vérification
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/check-admin`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ code: password }),
-});
+      const res = await api.post("/api/admin/check-admin", { password });
 
+      if (res.data.access) {
+        // Stocker un token fictif pour l'exemple
+        localStorage.setItem("token", "admin-token");
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.detail || "Mot de passe incorrect.");
-        return;
+        // Redirection vers AdminOrders
+        navigate("/admin/orders");
+      } else {
+        setError(res.data.message || "Mot de passe incorrect.");
       }
-
-      // Si le backend valide le mot de passe, redirection vers Home
-      navigate("/home");
     } catch (err: any) {
-      setError(err.message || "Erreur lors de la connexion.");
+      setError(err.response?.data?.message || "Erreur lors de la connexion.");
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-transparent">
-      {/* Bouton Retour */}
-      <div className="px-4 pt-4">
-        <button
-          onClick={() => navigate(from)}
-          className="px-4 py-2 bg-red-700 text-white rounded hover:bg-red-600 transition"
-        >
-          ← Retour
-        </button>
-      </div>
-
       <main className="flex-grow flex items-center justify-center px-4 py-10">
         <form
           onSubmit={handleSubmit}
           className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg w-full max-w-md space-y-6"
-          aria-label="Formulaire de connexion"
         >
           <h2 className="text-3xl font-extrabold text-center text-blue-700 dark:text-white tracking-tight">
             Connexion
           </h2>
 
           <div className="relative">
-            <label
-              htmlFor="password"
-              className="block text-sm font-semibold text-gray-700 dark:text-gray-300"
-            >
+            <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
               Mot de passe
             </label>
             <input
@@ -82,7 +60,6 @@ const Login: React.FC = () => {
               required
               className="mt-1 w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white pr-10"
             />
-
             <button
               type="button"
               aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}

@@ -4,11 +4,12 @@ import { getImageUrl } from "@/utils/images";
 
 type CheckoutForm = {
   name: string;
+  whatsapp: string;
+  secondaryPhone?: string;
   email: string;
   address: string;
   city: string;
   zip: string;
-  payment: string;
 };
 
 type CartItem = {
@@ -26,20 +27,22 @@ export default function Checkout() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [form, setForm] = useState<CheckoutForm>({
     name: "",
+    whatsapp: "",
+    secondaryPhone: "",
     email: "",
     address: "",
     city: "",
     zip: "",
-    payment: "card",
   });
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const saved = localStorage.getItem("moravi_cart");
     if (saved) setCart(JSON.parse(saved));
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -51,8 +54,25 @@ export default function Checkout() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validation obligatoire
+    if (!form.name || !form.whatsapp || !form.city) {
+      setError("Veuillez remplir les champs obligatoires : nom, WhatsApp et ville.");
+      return;
+    }
+
     console.log("Commande :", { form, cart });
+
+    // On vide le panier
     localStorage.removeItem("moravi_cart");
+
+    // 🎉 Message spécial MORAVI
+    alert(
+      "🎉 Votre commande a bien été enregistrée !\n\n" +
+      "Vous serez contacté très prochainement par WhatsApp, appel direct ou e-mail " +
+      "par l’équipe MORAVI afin de mieux vous orienter et finaliser votre commande."
+    );
+
     setSuccess(true);
   };
 
@@ -87,17 +107,36 @@ export default function Checkout() {
       <main className="container mx-auto px-4">
         <h1 className="text-3xl font-serif mb-6">Passer la commande</h1>
 
+        {error && <p className="text-red-500 mb-4">{error}</p>}
+
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Formulaire */}
           <div className="flex flex-col gap-3">
             <input
               type="text"
               name="name"
-              placeholder="Nom complet"
+              placeholder="Nom complet *"
               value={form.name}
               onChange={handleChange}
               className="p-3 rounded bg-gray-800 border border-gray-700"
               required
+            />
+            <input
+              type="text"
+              name="whatsapp"
+              placeholder="Numéro WhatsApp *"
+              value={form.whatsapp}
+              onChange={handleChange}
+              className="p-3 rounded bg-gray-800 border border-gray-700"
+              required
+            />
+            <input
+              type="text"
+              name="secondaryPhone"
+              placeholder="Numéro secondaire"
+              value={form.secondaryPhone}
+              onChange={handleChange}
+              className="p-3 rounded bg-gray-800 border border-gray-700"
             />
             <input
               type="email"
@@ -106,7 +145,6 @@ export default function Checkout() {
               value={form.email}
               onChange={handleChange}
               className="p-3 rounded bg-gray-800 border border-gray-700"
-              required
             />
             <input
               type="text"
@@ -115,12 +153,11 @@ export default function Checkout() {
               value={form.address}
               onChange={handleChange}
               className="p-3 rounded bg-gray-800 border border-gray-700"
-              required
             />
             <input
               type="text"
               name="city"
-              placeholder="Ville"
+              placeholder="Ville *"
               value={form.city}
               onChange={handleChange}
               className="p-3 rounded bg-gray-800 border border-gray-700"
@@ -133,18 +170,7 @@ export default function Checkout() {
               value={form.zip}
               onChange={handleChange}
               className="p-3 rounded bg-gray-800 border border-gray-700"
-              required
             />
-            <select
-              name="payment"
-              value={form.payment}
-              onChange={handleChange}
-              className="p-3 rounded bg-gray-800 border border-gray-700"
-            >
-              <option value="card">Carte bancaire</option>
-              <option value="paypal">PayPal</option>
-              <option value="cash">Paiement à la livraison</option>
-            </select>
 
             <button
               type="submit"
