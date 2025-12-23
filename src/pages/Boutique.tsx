@@ -37,7 +37,6 @@ const Boutique: React.FC = () => {
           params: { category: category || undefined },
         });
         if (!mounted) return;
-        // Compatibilité : l'API peut retourner "products" ou tableau direct
         const data = res.data.products || res.data;
         setProducts(data);
         console.log("🧠 Produits reçus :", data);
@@ -91,10 +90,10 @@ const Boutique: React.FC = () => {
                 {p.promoPrice ? (
                   <>
                     <span className="line-through text-red-400">{formatPrice(p.price)}</span>
-                    <span className="text-green-500">{formatPrice(p.promoPrice)}</span>
+                    <span className="text-green-400">{formatPrice(p.promoPrice)}</span>
                   </>
                 ) : (
-                  <span>{formatPrice(p.price)}</span>
+                  <span className="text-green-400">{formatPrice(p.price)}</span>
                 )}
               </div>
             </Link>
@@ -106,7 +105,7 @@ const Boutique: React.FC = () => {
 };
 
 function formatPrice(p?: number) {
-  return p == null ? "—" : Number(p).toFixed(2) + " €";
+  return p == null ? "—" : Number(p).toFixed(2) + " FCFA";
 }
 
 export default Boutique;

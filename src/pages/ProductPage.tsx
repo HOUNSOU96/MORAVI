@@ -34,7 +34,7 @@ const ProductPage: React.FC = () => {
       try {
         const res = await api.get(`/api/v1/products/${slug}`);
         const data = res.data.product || res.data;
-        console.log("🧠 Produit reçu :", data); // debug console
+        console.log("🧠 Produit reçu :", data);
         setProduct(data);
       } catch (err) {
         console.error("Erreur de chargement produit :", err);
@@ -82,10 +82,10 @@ const ProductPage: React.FC = () => {
           <div className="mt-4 text-2xl font-bold">
             {product.promoPrice ? (
               <>
-                <span className="line-through text-gray-400 mr-2">
+                <span className="line-through text-red-400 mr-2">
                   {formatPrice(product.price)}
                 </span>
-                <span className="text-red-500">{formatPrice(product.promoPrice)}</span>
+                <span className="text-green-400">{formatPrice(product.promoPrice)}</span>
               </>
             ) : (
               <span className="text-green-400">{formatPrice(product.price)}</span>
@@ -116,9 +116,10 @@ const ProductPage: React.FC = () => {
   );
 };
 
+/* ---------- Helpers ---------- */
 function formatPrice(p?: number) {
   if (!p) return "—";
-  return Number(p).toFixed(2) + " €";
+  return Number(p).toFixed(2) + " FCFA ";
 }
 
 export default ProductPage;

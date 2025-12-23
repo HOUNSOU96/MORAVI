@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import api from "@/utils/axios";
 import DarkModeToggle from "@/components/DarkModeToggle";
 import { useLocation, Link } from "react-router-dom";
@@ -15,7 +15,15 @@ type Product = {
   short_description?: string;
   category?: string;
 };
-type Promotion = { id: number; title: string; subtitle?: string; image_url?: string };
+
+type Promotion = {
+  id: number;
+  title: string;
+  subtitle?: string;
+  image_url?: string;
+  price?: number;
+  promoPrice?: number;
+};
 
 const Home: React.FC = () => {
   const [featured, setFeatured] = useState<Product[]>([]);
@@ -29,8 +37,6 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     let mounted = true;
-    const apiBase = import.meta.env.VITE_API_URL || "http://localhost:8000";
-
     const load = async () => {
       setLoading(true);
       setError(null);
@@ -201,7 +207,8 @@ const CategoriesSection: React.FC = () => {
 
 /* ---------- Featured Products ---------- */
 const FeaturedProducts: React.FC<{ products: Product[] }> = ({ products }) => {
-  if (!products || products.length === 0) return <div className="py-8 text-center text-gray-400">Aucun produit vedette pour le moment.</div>;
+  if (!products || products.length === 0)
+    return <div className="py-8 text-center text-gray-400">Aucun produit vedette pour le moment.</div>;
   return (
     <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {products.map(p => <ProductCard key={p.id} product={p} />)}
@@ -224,7 +231,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => (
             <span className="line-through text-red-400 text-sm">{formatPrice(product.price)}</span>
           </div>
         ) : (
-          <div className="text-lg font-semibold">{formatPrice(product.price)}</div>
+          <div className="text-green-400 font-semibold text-lg">{formatPrice(product.price)}</div>
         )}
         <div className="text-sm text-gray-300">Voir</div>
       </div>
@@ -234,15 +241,38 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => (
 
 /* ---------- Promotions ---------- */
 const PromotionsList: React.FC<{ promotions: Promotion[] }> = ({ promotions }) => {
-  if (!promotions || promotions.length === 0) return <div id="promotions" className="py-8 text-center text-gray-400">Aucune promotion active pour le moment.</div>;
+  if (!promotions || promotions.length === 0)
+    return <div id="promotions" className="py-8 text-center text-gray-400">Aucune promotion active pour le moment.</div>;
+
   return (
     <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {promotions.map(promo => (
-        <motion.div key={promo.id} whileHover={{ scale: 1.02 }} className="bg-gradient-to-br from-red-800/80 to-yellow-600/20 rounded-lg overflow-hidden p-4 border border-gray-700">
-          <div className="h-40 w-full bg-center bg-cover rounded" style={{ backgroundImage: `url(${getImageUrl(promo.image_url, promo.title)})` }} />
+        <motion.div
+          key={promo.id}
+          whileHover={{ scale: 1.02 }}
+          className="bg-gradient-to-br from-red-800/80 to-yellow-600/20 rounded-lg overflow-hidden p-4 border border-gray-700"
+        >
+          <div
+            className="h-40 w-full bg-center bg-cover rounded"
+            style={{ backgroundImage: `url(${getImageUrl(promo.image_url, promo.title)})` }}
+          />
           <div className="mt-3">
             <h4 className="text-lg font-semibold">{promo.title}</h4>
             {promo.subtitle && <p className="text-sm text-gray-200">{promo.subtitle}</p>}
+
+            {/* Prix si disponible */}
+            {typeof promo.price === "number" && (
+              <div className="mt-2">
+                {promo.promoPrice ? (
+                  <div className="flex flex-col">
+                    <span className="text-green-400 font-semibold">{formatPrice(promo.promoPrice)}</span>
+                    <span className="line-through text-red-400 text-sm">{formatPrice(promo.price)}</span>
+                  </div>
+                ) : (
+                  <div className="text-green-400 font-semibold text-lg">{formatPrice(promo.price)}</div>
+                )}
+              </div>
+            )}
           </div>
         </motion.div>
       ))}
@@ -318,6 +348,8 @@ const Footer: React.FC = () => (
 );
 
 /* ---------- Helpers ---------- */
-function formatPrice(p?: number) { return p == null ? "—" : Number(p).toFixed(2) + " €"; }
+function formatPrice(p?: number) {
+  return p == null ? "—" : Number(p).toFixed(2) + " FCFA";
+}
 
 export default Home;

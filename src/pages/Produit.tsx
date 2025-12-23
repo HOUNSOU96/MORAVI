@@ -1,3 +1,4 @@
+// 📁 src/pages/Produit.tsx
 import React, { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
 import api from "@/utils/axios";
@@ -27,7 +28,7 @@ const Produit: React.FC = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null); // <-- message toast
+  const [message, setMessage] = useState<string | null>(null);
 
   // Motion values pour effet dynamique
   const mouseX = useMotionValue(window.innerWidth / 2);
@@ -99,9 +100,8 @@ const Produit: React.FC = () => {
 
     localStorage.setItem("moravi_cart", JSON.stringify(cart));
 
-    // Afficher le message toast au lieu d'alert
     setMessage("Produit ajouté au panier !");
-    setTimeout(() => setMessage(null), 3000); // disparaît après 3 secondes
+    setTimeout(() => setMessage(null), 3000);
   };
   /* ------------------------------------------------------ */
 
@@ -131,16 +131,6 @@ const Produit: React.FC = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* Bouton Retour */}
-      {/*
-        <button
-          onClick={() => navigate(from)}
-          className="mb-6 px-4 py-2 bg-red-700 text-white rounded hover:bg-red-600 transition"
-        >
-          ← Retour
-        </button>
-        */}
-
         {/* Message toast */}
         {message && (
           <div className="fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50">
@@ -183,12 +173,10 @@ const Produit: React.FC = () => {
               {product.promoPrice ? (
                 <>
                   <span className="text-green-400">{formatPrice(product.promoPrice)}</span>
-                  <span className="line-through text-red-500 text-lg">
-                    {formatPrice(product.price)}
-                  </span>
+                  <span className="line-through text-red-500 text-lg">{formatPrice(product.price)}</span>
                 </>
               ) : (
-                <span>{formatPrice(product.price)}</span>
+                <span className="text-green-400">{formatPrice(product.price)}</span>
               )}
             </div>
 
@@ -217,8 +205,9 @@ const Produit: React.FC = () => {
   );
 };
 
+/* ---------- Helpers ---------- */
 function formatPrice(p?: number) {
-  return p == null ? "—" : Number(p).toFixed(2) + " €";
+  return p == null ? "—" : Number(p).toFixed(2) + " FCFA ";
 }
 
 export default Produit;
