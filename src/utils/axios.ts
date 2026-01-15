@@ -1,10 +1,8 @@
 import axios from "axios";
 
-const apiBase = import.meta.env.VITE_API_URL || "http://localhost:8000";
-
 const api = axios.create({
-  baseURL: apiBase,
-  withCredentials: true, // pour envoyer les cookies si backend les utilise
+  baseURL: import.meta.env.VITE_API_URL || "https://code-backend-iuol.onrender.com", // adapte si ton backend est sur un autre host/port
+  withCredentials: true,
 });
 
 // Ajouter le token (si JWT stocké dans localStorage)

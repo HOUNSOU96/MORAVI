@@ -20,8 +20,10 @@ const Login: React.FC = () => {
     }
 
     try {
-      // Appel API MORAVI
-      const res = await api.post("/api/admin/check-admin", { password });
+      // Appel API MORAVI avec trim pour éviter les espaces
+      const res = await api.post("/api/admin/check-admin", {
+        password: password.trim(),
+      });
 
       if (res.data.access) {
         // Stocker le token JWT pour futures requêtes
