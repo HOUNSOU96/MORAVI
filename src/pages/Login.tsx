@@ -20,19 +20,21 @@ const Login: React.FC = () => {
     }
 
     try {
+      // Appel API MORAVI
       const res = await api.post("/api/admin/check-admin", { password });
 
       if (res.data.access) {
-        // Stocker un token fictif pour l'exemple
-         localStorage.setItem("token", res.data.token);
+        // Stocker le token JWT pour futures requêtes
+        localStorage.setItem("moravi_token", res.data.token);
 
         // Redirection vers AdminOrders
         navigate("/admin/orders");
       } else {
-        setError(res.data.message || "Mot de passe incorrect.");
+        setError("Mot de passe incorrect.");
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || "Erreur lors de la connexion.");
+      // Récupérer le message envoyé par FastAPI (detail)
+      setError(err.response?.data?.detail || "Erreur lors de la connexion.");
     }
   };
 
@@ -48,7 +50,10 @@ const Login: React.FC = () => {
           </h2>
 
           <div className="relative">
-            <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <label
+              htmlFor="password"
+              className="block text-sm font-semibold text-gray-700 dark:text-gray-300"
+            >
               Mot de passe
             </label>
             <input
