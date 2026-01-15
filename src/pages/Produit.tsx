@@ -92,6 +92,7 @@ const Produit: React.FC = () => {
       cart.push({
         id: product.id,
         name: product.name,
+        slug: product.slug,
         price: product.promoPrice || product.price,
         image_url: product.image_url,
         quantity: 1,

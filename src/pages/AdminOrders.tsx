@@ -99,9 +99,10 @@ export default function AdminOrders() {
 
   // 🔥 BOUTON DECONNEXION
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
+  localStorage.clear(); // nettoie tout
+  navigate("/login", { replace: true });
+};
+
 
   if (loading) return <p className="text-center mt-10 text-gray-300">Chargement...</p>;
   if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
@@ -194,7 +195,7 @@ export default function AdminOrders() {
                 {selectedOrder.address && <p><strong>Adresse :</strong> {selectedOrder.address}</p>}
                 <p><strong>Ville :</strong> {selectedOrder.city}</p>
                 {selectedOrder.zip && <p><strong>Code postal :</strong> {selectedOrder.zip}</p>}
-                <p><strong>Total :</strong> {selectedOrder.total.toFixed(2)} €</p>
+                <p><strong>Total :</strong> {selectedOrder.total.toFixed(2)} FCFA</p>
                 <p><strong>Status :</strong> {selectedOrder.status}</p>
               </div>
               <div className="space-y-2">
@@ -208,8 +209,8 @@ export default function AdminOrders() {
                       <p className="text-gray-300 text-sm">
                         {item.promoPrice ? (
                           <>
-                            <span className="line-through text-red-400">{item.price.toFixed(2)} €</span>{" "}
-                            <span className="text-green-500">{item.promoPrice.toFixed(2)} €</span>
+                            <span className="line-through text-red-400">{item.price.toFixed(2)} FCFA</span>{" "}
+                            <span className="text-green-500">{item.promoPrice.toFixed(2)} FCFA</span>
                           </>
                         ) : `${item.price.toFixed(2)} €`} x {item.quantity}
                       </p>
