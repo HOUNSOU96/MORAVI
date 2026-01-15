@@ -24,7 +24,7 @@ const Login: React.FC = () => {
 
       if (res.data.access) {
         // Stocker un token fictif pour l'exemple
-        localStorage.setItem("token", "admin-token");
+         localStorage.setItem("token", res.data.token);
 
         // Redirection vers AdminOrders
         navigate("/admin/orders");
